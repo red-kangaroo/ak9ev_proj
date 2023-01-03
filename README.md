@@ -26,6 +26,11 @@ py optim.py
 Výstup skiptu se uloží do souboru `raw_output.xlsx`, a zároveň skript vykreslí
 grafy pro jednotlivé vstupy.
 
+```
+py optim.py --enable-plots
+py optim.py -p
+```
+
 ### Hill climber
 
 Pro funkci Schwefel váznul hill climber opakovaně v lokálních minimech,
