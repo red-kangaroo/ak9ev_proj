@@ -108,7 +108,7 @@ def differential_evolution(it: int, fn, dim: int, constr_min: float, constr_max:
     ws.title = f"DE {fn.__name__.replace('_', ' ').title()} D{dim}"
     ws.append(["Iteration", "Minimum", "", "Population Input/Output"])
 
-    if enable_plots:  # TODO
+    if enable_plots:
         plt.figure(3+dim)
 
     def mutate(idx: int, pop: list) -> list:
@@ -152,12 +152,14 @@ def differential_evolution(it: int, fn, dim: int, constr_min: float, constr_max:
 
         population = [[random.uniform(constr_min, constr_max) for b in range(dim)] for p in range(DE_NP)]
         res_in = [fn(p) for p in population]
+        res_out = None
+        res_best = None
         ws.append([i + 1, '', ''] + res_in)
 
         uses_left = FES * dim
         generation = 0
         while uses_left > 0:
-            logger.debug(f"Climbing again as we have {uses_left} uses left for iteration {i}.")
+            # TODO: not so many for loops
 
             # Mutate
             mutant = list()
@@ -169,6 +171,7 @@ def differential_evolution(it: int, fn, dim: int, constr_min: float, constr_max:
                 nu_gen.append(crossbreed(population[p], mutant[p]))
 
             # Selection
+            res_out = list()
             for p in range(DE_NP):
                 x = fn(population[p])
                 u = fn(nu_gen[p])
@@ -176,24 +179,27 @@ def differential_evolution(it: int, fn, dim: int, constr_min: float, constr_max:
 
                 if u <= x:
                     population[p] = nu_gen[p]
+                    res_out.append(u)
+                else:
+                    res_out.append(x)
+
+            # res_out = [fn(p) for p in population]
+            res_best = min(res_out)
+            graph_x.append(generation)
+            graph_y.append(res_best)
 
             generation += 1
         if uses_left < 0:
             logger.error(f"Got down to negative uses: {uses_left}")
 
-        res_out = [fn(p) for p in population]
-        res_best = min(res_out)
         if enable_plots:
-            graph_x.append(FES * dim)
-            graph_y.append(res_out)
             plt.plot(graph_x, graph_y, label=f"Iter. No. {i + 1}")
-
         ws.append(['', res_best, ''] + res_out)
-        logger.debug(f"For {dim} dimensions: minimum {res_out}. Climbed {generation} time(s).")
+        logger.debug(f"For {dim} dimensions minimum {res_out}. Went through {generation} generations.")
 
     if enable_plots:
-        plt.xlabel('Cost Function Evaluations')
-        plt.ylabel('Results')
+        plt.xlabel('Generation')
+        plt.ylabel('Best Results')
         plt.title(f"All iterations of differential evolution for {fn.__name__.replace('_', ' ').title()}, D{dim}")
 
         splt = plt.subplot()
@@ -233,12 +239,12 @@ def get_results(it: int, enable_plots: bool = False):
         RESULTS[d] = {
             'differential_evolution': dict(),
         }
-        differential_evolution(it, de_jong_1, d, -5.0, 5.0, enable_plots)
-        differential_evolution(it, de_jong_2, d, -5.0, 5.0, enable_plots)
+        # differential_evolution(it, de_jong_1, d, -5.0, 5.0, enable_plots)
+        # differential_evolution(it, de_jong_2, d, -5.0, 5.0, enable_plots)
         differential_evolution(it, schwefel, d, -500, 500, enable_plots)
         differential_evolution(it, rastrigin, d, -500, 500, enable_plots)
 
-        if enable_plots:
+        if enable_plots: # TODO
             for idx, f in enumerate(FUNCTIONS):
                 avg_x = dict()
                 med_x = dict()
