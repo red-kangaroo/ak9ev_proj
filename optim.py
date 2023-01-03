@@ -92,7 +92,7 @@ def rastrigin(x: list):
 # Algorithms
 ##################################################
 def differential_evolution(it: int, fn, dim: int, constr_min: float, constr_max: float,
-                           enable_plots: bool = False):
+                           enable_plots: bool = False) -> int:
     """
 
     :param it: maximum iterations
@@ -101,12 +101,13 @@ def differential_evolution(it: int, fn, dim: int, constr_min: float, constr_max:
     :param constr_min: lower constraint
     :param constr_max: upper constraint
     :param enable_plots: show graphs
-    :return: nothing at all
+    :return: maximal generation achieved
     """
     logger.info(f"Starting differential evolution for D{dim} {fn.__name__}...")
     ws = wb.create_sheet()
     ws.title = f"DE {fn.__name__.replace('_', ' ').title()} D{dim}"
     ws.append(["Iteration", "Minimum", "", "Population Input/Output"])
+    max_gen = 0
 
     if enable_plots:
         plt.figure(3+dim)
@@ -145,8 +146,10 @@ def differential_evolution(it: int, fn, dim: int, constr_min: float, constr_max:
 
         return u
 
-    RESULTS[dim]['differential_evolution'][fn.__name__] = [list() for i in range(it)]
+    # RESULTS[dim]['differential_evolution'][fn.__name__] = [list() for i in range(it)]
+    RESULTS[dim]['differential_evolution'][fn.__name__] = list()
     for i in range(it):
+        RESULTS[dim]['differential_evolution'][fn.__name__].append(list())
         graph_x = list()
         graph_y = list()
 
@@ -187,10 +190,13 @@ def differential_evolution(it: int, fn, dim: int, constr_min: float, constr_max:
             res_best = min(res_out)
             graph_x.append(generation)
             graph_y.append(res_best)
+            RESULTS[dim]['differential_evolution'][fn.__name__][i].append((generation, res_best))
 
             generation += 1
         if uses_left < 0:
             logger.error(f"Got down to negative uses: {uses_left}")
+        if generation > max_gen:
+            max_gen = generation
 
         if enable_plots:
             plt.plot(graph_x, graph_y, label=f"Iter. No. {i + 1}")
@@ -199,7 +205,7 @@ def differential_evolution(it: int, fn, dim: int, constr_min: float, constr_max:
 
     if enable_plots:
         plt.xlabel('Generation')
-        plt.ylabel('Best Results')
+        plt.ylabel('Best Member of Population')
         plt.title(f"All iterations of differential evolution for {fn.__name__.replace('_', ' ').title()}, D{dim}")
 
         splt = plt.subplot()
@@ -209,6 +215,8 @@ def differential_evolution(it: int, fn, dim: int, constr_min: float, constr_max:
 
         plt.show()
         plt.clf()
+
+    return max_gen
 
 
 ##################################################
@@ -239,12 +247,14 @@ def get_results(it: int, enable_plots: bool = False):
         RESULTS[d] = {
             'differential_evolution': dict(),
         }
-        # differential_evolution(it, de_jong_1, d, -5.0, 5.0, enable_plots)
-        # differential_evolution(it, de_jong_2, d, -5.0, 5.0, enable_plots)
-        differential_evolution(it, schwefel, d, -500, 500, enable_plots)
-        differential_evolution(it, rastrigin, d, -500, 500, enable_plots)
+        gen = list()
+        gen.append(differential_evolution(it, de_jong_1, d, -5.0, 5.0, enable_plots))
+        gen.append(differential_evolution(it, de_jong_2, d, -5.0, 5.0, enable_plots))
+        gen.append(differential_evolution(it, schwefel, d, -500, 500, enable_plots))
+        gen.append(differential_evolution(it, rastrigin, d, -500, 500, enable_plots))
+        max_gen = max(gen)
 
-        if enable_plots: # TODO
+        if enable_plots:
             for idx, f in enumerate(FUNCTIONS):
                 avg_x = dict()
                 med_x = dict()
@@ -260,7 +270,7 @@ def get_results(it: int, enable_plots: bool = False):
                     min_x[k] = list()
                     graph_y[k] = list()
 
-                    steps = FES
+                    steps = max_gen  # TODO
                     for x in range(steps):
                         x_total = list()
                         y_total = 0
@@ -284,8 +294,8 @@ def get_results(it: int, enable_plots: bool = False):
                     plt.plot(graph_y[k], max_x[k], label="Max")
                     plt.plot(graph_y[k], min_x[k], label="Min")
 
-                    plt.xlabel('Cost Function Evaluations')
-                    plt.ylabel('Results')
+                    plt.xlabel('Generation')
+                    plt.ylabel('Best Member of Population')
                     plt.title(f"Statistics for {k.replace('_', ' ')} for {f.replace('_', ' ').title()}, D{d}")
 
                     splt = plt.subplot()
