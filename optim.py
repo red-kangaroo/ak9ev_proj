@@ -270,7 +270,7 @@ def get_results(it: int, enable_plots: bool = False):
                     min_x[k] = list()
                     graph_y[k] = list()
 
-                    steps = max_gen  # TODO
+                    steps = max_gen
                     for x in range(steps):
                         x_total = list()
                         y_total = 0
@@ -305,20 +305,20 @@ def get_results(it: int, enable_plots: bool = False):
 
                     plt.show()
 
-                plt.figure(idx + 333 + d)
-                for k in RESULTS[d].keys():
-                    plt.plot(graph_y[k], avg_x[k], label=k.replace('_', ' ').title())
-
-                plt.xlabel('Cost Function Evaluations')
-                plt.ylabel('Results')
-                plt.title(f"Algorithm comparison for {f.replace('_', ' ').title()}, D{d}")
-
-                splt = plt.subplot()
-                box = splt.get_position()
-                splt.set_position([box.x0, box.y0, box.width * 0.8, box.height])
-                splt.legend(loc='upper left', bbox_to_anchor=(1, 1))
-
-                plt.show()
+                # plt.figure(idx + 333 + d)
+                # for k in RESULTS[d].keys():
+                #     plt.plot(graph_y[k], avg_x[k], label=k.replace('_', ' ').title())
+                #
+                # plt.xlabel('Generation')
+                # plt.ylabel('Best Member of Population')
+                # plt.title(f"Algorithm comparison for {f.replace('_', ' ').title()}, D{d}")
+                #
+                # splt = plt.subplot()
+                # box = splt.get_position()
+                # splt.set_position([box.x0, box.y0, box.width * 0.8, box.height])
+                # splt.legend(loc='upper left', bbox_to_anchor=(1, 1))
+                #
+                # plt.show()
 
     wb.save(Path("./raw_output.xlsx"))
     wb.close()
