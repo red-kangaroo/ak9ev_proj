@@ -93,14 +93,103 @@ def rastrigin(x: list):
 ##################################################
 def differential_evolution(it: int, fn, dim: int, constr_min: float, constr_max: float,
                            enable_plots: bool = False):
-    logger.info(f"Starting simulated annealing for D{dim} {fn.__name__}...")
+    """
+
+    :param it: maximum iterations
+    :param fn: function
+    :param dim: dimensions
+    :param constr_min: lower constraint
+    :param constr_max: upper constraint
+    :param enable_plots: show graphs
+    :return: nothing at all
+    """
+    logger.info(f"Starting differential evolution for D{dim} {fn.__name__}...")
     ws = wb.create_sheet()
-    ws.title = f"Differential evolution {fn.__name__.replace('_', ' ').title()} D{dim}"
-    ws.append(["Iteration", "Minimum", "Inputs"])
-    if enable_plots:
+    ws.title = f"DE {fn.__name__.replace('_', ' ').title()} D{dim}"
+    ws.append(["Iteration", "Minimum", "", "Population Input/Output"])
+
+    if enable_plots:  # TODO
         plt.figure(3+dim)
 
-    # TODO
+    def mutate(idx: int, pop: list) -> list:
+        nonlocal dim
+
+        # We have x_i, select x_1 to x_3:
+        x = [idx]
+        while len(x) < 4:
+            i = random.randrange(0, DE_NP)
+            if i not in x:
+                x.append(i)
+
+        # DE/rand/1
+        v = list()
+        for j in range(dim):
+            v.append(pop[x[1]][j] + DE_F * (pop[x[2]][j] - pop[x[3]][j]))
+
+        return v
+
+    def crossbreed(x: list, v: list) -> list:
+        nonlocal dim
+
+        if DE_CR == 0:
+            # TODO
+            raise NotImplementedError
+
+        else:
+            u = list()
+            for j in range(dim):
+                if random.random() < DE_CR:
+                    u.append(v[j])
+                else:
+                    u.append(x[j])
+
+        return u
+
+    RESULTS[dim]['differential_evolution'][fn.__name__] = [list() for i in range(it)]
+    for i in range(it):
+        graph_x = list()
+        graph_y = list()
+
+        population = [[random.uniform(constr_min, constr_max) for b in range(dim)] for p in range(DE_NP)]
+        res_in = [fn(p) for p in population]
+        ws.append([i + 1, '', ''] + res_in)
+
+        uses_left = FES * dim
+        generation = 0
+        while uses_left > 0:
+            logger.debug(f"Climbing again as we have {uses_left} uses left for iteration {i}.")
+
+            # Mutate
+            mutant = list()
+            for p in range(DE_NP):
+                mutant.append(mutate(p, population))
+
+            nu_gen = list()
+            for p in range(DE_NP):
+                nu_gen.append(crossbreed(population[p], mutant[p]))
+
+            # Selection
+            for p in range(DE_NP):
+                x = fn(population[p])
+                u = fn(nu_gen[p])
+                uses_left -= 2
+
+                if u <= x:
+                    population[p] = nu_gen[p]
+
+            generation += 1
+        if uses_left < 0:
+            logger.error(f"Got down to negative uses: {uses_left}")
+
+        res_out = [fn(p) for p in population]
+        res_best = min(res_out)
+        if enable_plots:
+            graph_x.append(FES * dim)
+            graph_y.append(res_out)
+            plt.plot(graph_x, graph_y, label=f"Iter. No. {i + 1}")
+
+        ws.append(['', res_best, ''] + res_out)
+        logger.debug(f"For {dim} dimensions: minimum {res_out}. Climbed {generation} time(s).")
 
     if enable_plots:
         plt.xlabel('Cost Function Evaluations')
