@@ -3,17 +3,15 @@
 # Evoluční algoritmy
 </div>
 
-_TODO_
-
 Přehled výsledků vyhledávání minim jde najít v souboru `statistics_output.xlsx`,
-kde je přehled iterací pro jednotlivé algoritmy, funkce a dimenzionalitu,
-nalezená minima a vstupy, které k tomuto minimu vedly. Dále je pak pro
-každý algoritmus, funkci a dimenzionalitu uveden průměr, medián, maximum,
-minimum a standardní odchylka.
+kde je přehled iterací pro jednotlivé funkce a dimenzionalitu, trvání výpočtu,
+nalezená minima a populace poslední generace, ze které bylo toto minimum získáno.
+Dále je pak pro každý algoritmus, funkci a dimenzionalitu uveden průměr, medián,
+maximum, minimum a standardní odchylka.
 
 Vykreslené grafy dle zadání jde najít v adresáři `./plots`, jejich pojmenování
-vždy udává testovací funkci, dimenze, typ grafu a typ algoritmu. Grafy byly
-vykresleny pomocí knihovny `matplotlib`.
+vždy udává testovací funkci, dimenzi a typ grafu - buď přehled iterací, nebo 
+statistických ukazatelů. Grafy byly vykresleny pomocí knihovny `matplotlib`.
 
 Implementace algoritmů je v souboru `optim.py`. Pokud máte nainstalovaný
 Python 3.x, jde skript spustit následovně:
@@ -23,24 +21,18 @@ py -m pip install -r requirements.txt
 py optim.py
 ```
 
-Výstup skiptu se uloží do souboru `raw_output.xlsx`, a zároveň skript vykreslí
-grafy pro jednotlivé vstupy.
+Výstup skiptu se uloží do souboru `raw_output.xlsx`.
+
+Pokud budeme chtít vykreslit i grafy pro jednotlivé vstupy, je potřeba skript
+spustit s touto možností povolenou:
 
 ```
 py optim.py --enable-plots
 py optim.py -p
 ```
 
-### Hill climber
+### Schwefel
 
-Pro funkci Schwefel váznul hill climber opakovaně v lokálních minimech,
-rozhodl jsem se ho tedy spustit opakovaně v jedné iteraci, celkem 5x
-(po 2000 voláních účelové funkce) a brát nejlepší výsledek. Toto opakované
-spuštění je dobře patrné i na grafech, kde dochází ke zlomům a skoku na 
-lepší výsledek.
-
-Taktéž jsem zkoušel alternativní metodu určování okolí, v grafech se jedná
-o grafy se sufixem `_alt`, a to použití 10% okolí od aktuálního bodu, ne 
-10% z celého rozsahu. Tím se postupným snižováním hodnoty bodu při hledání
-minima snižovala i velikost okolí. Především pro funkci Schwefel to vedlo
-k celkem výraznému zlepšení dosahovaných výsledků.
+Pro funkci Schwefel jsou výsledky DE nepříliš uspokojivé. Na rozdíl od ostatních
+funkcí zde algoritmus váznul v lokálních minimech a pouze v některých iteracích
+a až po více generacích dokázal najít i lepší minimum.
