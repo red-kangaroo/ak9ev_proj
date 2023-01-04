@@ -106,7 +106,7 @@ def differential_evolution(it: int, fn, dim: int, constr_min: float, constr_max:
     logger.info(f"Starting differential evolution for D{dim} {fn.__name__}...")
     ws = wb.create_sheet()
     ws.title = f"DE {fn.__name__.replace('_', ' ').title()} D{dim}"
-    ws.append(["Iteration", "Minimum", "", "Population Input/Output"])
+    ws.append(["Iteration", "Minimum Found", "Duration", "Population of Last Generation"])
     max_gen = 0
 
     if enable_plots:
@@ -157,7 +157,7 @@ def differential_evolution(it: int, fn, dim: int, constr_min: float, constr_max:
         res_in = [fn(p) for p in population]
         res_out = None
         res_best = None
-        ws.append([i + 1, '', ''] + res_in)
+        # ws.append([i + 1, '', ''] + res_in)
 
         uses_left = FES * dim
         generation = 0
@@ -202,7 +202,7 @@ def differential_evolution(it: int, fn, dim: int, constr_min: float, constr_max:
 
         if enable_plots:
             plt.plot(graph_x, graph_y, label=f"Iter. No. {i + 1}")
-        ws.append(['', res_best, ''] + res_out)
+        ws.append([i+1, res_best, time_end.total_seconds()] + res_out)
         logger.debug(f"For {dim} dimensions went through {generation} generations.")
 
     if enable_plots:
