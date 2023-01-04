@@ -93,7 +93,7 @@ def rastrigin(x: list):
 ##################################################
 def differential_evolution(it: int, fn, dim: int, constr_min: float, constr_max: float,
                            enable_plots: bool = False) -> int:
-    """
+    """TODO
 
     :param it: maximum iterations
     :param fn: function
@@ -161,30 +161,28 @@ def differential_evolution(it: int, fn, dim: int, constr_min: float, constr_max:
 
         uses_left = FES * dim
         generation = 0
+        time_begin = datetime.datetime.now()
         while uses_left > 0:
             # TODO: not so many for loops
 
-            # Mutate
-            mutant = list()
-            for p in range(DE_NP):
-                mutant.append(mutate(p, population))
-
             nu_gen = list()
-            for p in range(DE_NP):
-                nu_gen.append(crossbreed(population[p], mutant[p]))
-
-            # Selection
             res_out = list()
             for p in range(DE_NP):
+                mutant = mutate(p, population)
+                breed = crossbreed(population[p], mutant)
+
+                # Selection
                 x = fn(population[p])
-                u = fn(nu_gen[p])
+                u = fn(breed)
                 uses_left -= 2
 
                 if u <= x:
-                    population[p] = nu_gen[p]
+                    nu_gen.append(breed)
                     res_out.append(u)
                 else:
+                    nu_gen.append(population[p])
                     res_out.append(x)
+            population = nu_gen  # Reset population to new generation.
 
             # res_out = [fn(p) for p in population]
             res_best = min(res_out)
@@ -193,6 +191,10 @@ def differential_evolution(it: int, fn, dim: int, constr_min: float, constr_max:
             RESULTS[dim]['differential_evolution'][fn.__name__][i].append((generation, res_best))
 
             generation += 1
+
+        time_end = datetime.datetime.now() - time_begin
+        logger.info(f"Iteration {i+1} ended in {time_end.total_seconds():.3f} seconds "
+                    f"({time_end.total_seconds() / 60:.3f} minutes) with a minimum of {res_best}.")
         if uses_left < 0:
             logger.error(f"Got down to negative uses: {uses_left}")
         if generation > max_gen:
@@ -201,7 +203,7 @@ def differential_evolution(it: int, fn, dim: int, constr_min: float, constr_max:
         if enable_plots:
             plt.plot(graph_x, graph_y, label=f"Iter. No. {i + 1}")
         ws.append(['', res_best, ''] + res_out)
-        logger.debug(f"For {dim} dimensions minimum {res_out}. Went through {generation} generations.")
+        logger.debug(f"For {dim} dimensions went through {generation} generations.")
 
     if enable_plots:
         plt.xlabel('Generation')
@@ -336,3 +338,9 @@ if __name__ == "__main__":
     time_elapsed = time_stop - time_start
     logger.info(f"Done {ITERATIONS} iterations over {len(FUNCTIONS)} functions in {time_elapsed.total_seconds():.3f} "
                 f"seconds ({time_elapsed.total_seconds() / 60:.3f} minutes).")
+
+    if time_elapsed.total_seconds() > 60:
+        import winsound
+        frequency = 2500  # 2500 Hertz
+        duration = 1000  # 1000 ms == 1 second
+        winsound.Beep(frequency, duration)
