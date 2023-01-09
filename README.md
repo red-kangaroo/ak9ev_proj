@@ -4,7 +4,7 @@
 </div>
 
 Přehled výsledků vyhledávání minim jde najít v souboru `statistics_output.xlsx`,
-kde je přehled iterací pro jednotlivé funkce a dimenzionalitu,
+kde je přehled iterací pro jednotlivé funkce a dimenzionalitu, trvání výpočtu,
 nalezená minima a populace poslední generace, ze které bylo toto minimum získáno.
 Dále je pak pro každý algoritmus, funkci a dimenzionalitu uveden průměr, medián,
 maximum, minimum a standardní odchylka.
@@ -44,3 +44,10 @@ a až po více generacích dokázal najít i lepší minimum. Tento problém jse
 odstranit zvolením metody kontroly hranic random, tedy výměnou za náhodnou novou
 souřadnici, která může zvýšit pravděpodobnost, že z lokálního minima
 vyvázneme, vnesením nového "skoku" v pohybu jednotlivých bodů.
+
+### Rychlost výpočtu
+
+Rychlost diferenciální evoluce v Pythonu není nijak závratná, proto by se v reálném
+kódu použilo řešení z knihovny `scipy`, viz [zde](https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.differential_evolution.html).
+Knihovna `scipy` obsahuje mnohé evoluční algoritmy implementované především v `C` a `C++`,
+ale volané jako Python metody pro jednoduché začlenění do vědeckých skriptů.
