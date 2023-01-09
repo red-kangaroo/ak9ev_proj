@@ -3,6 +3,9 @@
 # Evoluční algoritmy
 </div>
 
+Projekt do kurzu [AK9EV](https://moodle.utb.cz/course/view.php?id=27600),
+repository je [zde](https://github.com/red-kangaroo/ak9ev_proj).
+
 Přehled výsledků vyhledávání minim jde najít v souboru `statistics_output.xlsx`,
 kde je přehled iterací pro jednotlivé funkce a dimenzionalitu, trvání výpočtu,
 nalezená minima a populace poslední generace, ze které bylo toto minimum získáno.
