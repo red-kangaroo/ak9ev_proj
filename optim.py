@@ -130,7 +130,7 @@ def differential_evolution(it: int, fn, dim: int, constr_min: float, constr_max:
         return v
 
     def crossbreed(x: list, v: list) -> list:
-        nonlocal dim
+        nonlocal dim, constr_min, constr_max
 
         if DE_CR == 0:
             # TODO
@@ -140,9 +140,15 @@ def differential_evolution(it: int, fn, dim: int, constr_min: float, constr_max:
             u = list()
             for j in range(dim):
                 if random.random() < DE_CR:
-                    u.append(v[j])
+                    nu = v[j]
                 else:
-                    u.append(x[j])
+                    nu = x[j]
+
+                if nu < constr_min or nu > constr_max:
+                    logger.debug(f"Tried to move over constraint.")
+                    nu = random.uniform(constr_min, constr_max)
+
+                u.append(nu)
 
         return u
 
@@ -154,7 +160,7 @@ def differential_evolution(it: int, fn, dim: int, constr_min: float, constr_max:
         graph_y = list()
 
         population = [[random.uniform(constr_min, constr_max) for b in range(dim)] for p in range(DE_NP)]
-        res_in = [fn(p) for p in population]
+        # res_in = [fn(p) for p in population]
         res_out = None
         res_best = None
         # ws.append([i + 1, '', ''] + res_in)
@@ -251,7 +257,7 @@ def get_results(it: int, enable_plots: bool = False):
         gen.append(differential_evolution(it, de_jong_1, d, -5.0, 5.0, enable_plots))
         gen.append(differential_evolution(it, de_jong_2, d, -5.0, 5.0, enable_plots))
         gen.append(differential_evolution(it, schwefel, d, -500, 500, enable_plots))
-        gen.append(differential_evolution(it, rastrigin, d, -500, 500, enable_plots))
+        gen.append(differential_evolution(it, rastrigin, d, -5.12, 5.12, enable_plots))
         max_gen = max(gen)
 
         if enable_plots:
