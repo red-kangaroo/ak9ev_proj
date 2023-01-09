@@ -93,7 +93,7 @@ def rastrigin(x: list):
 ##################################################
 def differential_evolution(it: int, fn, dim: int, constr_min: float, constr_max: float,
                            enable_plots: bool = False) -> int:
-    """TODO
+    """Run differential evolution optimization
 
     :param it: maximum iterations
     :param fn: function
@@ -145,7 +145,7 @@ def differential_evolution(it: int, fn, dim: int, constr_min: float, constr_max:
                     nu = x[j]
 
                 if nu < constr_min or nu > constr_max:
-                    logger.debug(f"Tried to move over constraint.")
+                    # logger.debug(f"Tried to move over constraint.")
                     nu = random.uniform(constr_min, constr_max)
 
                 u.append(nu)
@@ -260,6 +260,7 @@ def get_results(it: int, enable_plots: bool = False):
         gen.append(differential_evolution(it, rastrigin, d, -5.12, 5.12, enable_plots))
         max_gen = max(gen)
 
+        # Plot statistical graphs:
         if enable_plots:
             for idx, f in enumerate(FUNCTIONS):
                 avg_x = dict()
